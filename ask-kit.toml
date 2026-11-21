@@ -1,0 +1,42 @@
+id = "temet.files"
+name = "files"
+version = "0.1.0"
+min_ask_kit = "0.3.0"
+says = "files on this machine outside a code repository's code: where a file is (by name, kind, size or date), what is taking up the disk space, what changed in a folder recently, which documents mention something, what a PDF, Word, Excel, PowerPoint or OpenDocument file says, what a zip or tar archive holds, which files are duplicates; and, when asked, moving, copying, renaming, trashing or unpacking them"
+keywords = ["where (is|did i (put|save)) (the |my )?\\S+\\.(pdf|docx?|xlsx?|pptx?|csv|zip|png|jpe?g)", "(the |my )?(pdf|docx?|xlsx|pptx|word|excel|powerpoint) (file|document)", "downloads?( folder)?", "disk space", "taking up (the )?(space|disk)", "biggest (files?|folders?)", "duplicate files?", "(which|what) (files?|documents?) (mention|contain|have)", "what changed in (the |my |~)", "(files?|documents?) (i |that i )?(changed|modified|saved|downloaded)", "what('s| is) (in|inside) (the |this )?(zip|archive|tar|pdf)", "\\.(zip|tar\\.gz|tgz|pdf|docx|xlsx|pptx)\\b"]
+route_hint = "where a file is, what uses the disk space, what changed in a folder lately, which documents mention a word and what a PDF, Word, Excel, PowerPoint or archive file says, in folders such as Documents and Downloads, are files; a code repository's source (where something is defined, how it works) is code; what is inside a CSV, TSV or JSON data file (columns, rows, values) is data and a .db file is sqlite; a PDF or page at a URL is web; settings under ~/.config are dotfiles; docker image and volume disk use is docker; git history and many-repository state are git and repos; what a past session did is sessions or mike. Credential files (.env, keys, ssh, tokens, browser profiles) are never read."
+cite = "the full path of each file, the page or line number for a quote, and the modified date when time matters"
+instructions = "instructions.md"
+scripts = "scripts"
+bench = "bench/questions.json"
+acts = ["files.move", "files.copy", "files.rename", "files.mkdir", "files.trash", "files.remove", "files.extract"]
+
+[[settings]]
+key = "WORKDIR"
+about = "the folder relative paths resolve against; by default the folder the agent runs in"
+detect = ["node", "-e", "process.stdout.write(process.cwd())"]
+
+[[settings]]
+key = "FILES_ROOTS"
+about = "the folders the kit may look in, separated by commas; the folder the agent runs in is always included"
+default = "~"
+
+[[sources]]
+kind = "module"
+name = "files"
+module = "files.mjs"
+api = "api.d.ts"
+
+[[actions]]
+name = "space"
+title = "What uses the space under a folder"
+script = "space"
+match = ['what(?:\x27s| is) (?:taking up|using|eating)(?: all)?(?: the)? (?:disk )?space (?:in|under|on) (?<path>[~/][^\s?]*)', 'what(?:\x27s| is) (?:so )?big (?:in|under) (?<path>[~/][^\s?]*)']
+expect = '"verdict"'
+
+[[actions]]
+name = "recent"
+title = "What changed in a folder lately"
+script = "recent"
+match = ['what (?:has )?changed in (?<under>[~/][^\s?]*?)(?: (?<since>(?:since|this|last|past|in the last) [a-z0-9 ]+|today|yesterday))?\??$']
+expect = '"verdict"'
