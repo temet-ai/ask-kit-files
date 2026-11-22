@@ -16,8 +16,7 @@ export default async function ({ files }, { path, lines = 30, match, now } = {})
     const a = await files.list(path, { match, now, limit: 60 });
     if (!a.error) return { verdict: `${a.path} is a ${a.format} archive of ${a.size}: ${a.entries} ${a.entries === 1 ? "file" : "files"}${a.folders ? ` and ${a.folders} ${a.folders === 1 ? "folder" : "folders"}` : ""}${a.unpacked ? `, ${a.unpacked} unpacked` : ""}; top level: ${(a.top ?? []).slice(0, 3).join(", ")}${(a.top ?? []).length > 3 ? ` and ${a.top.length - 3} more` : ""}`, ...a };
   }
-  const o = await files.outline(path);
-  const r = await files.read(path, { lines: Number(lines), now });
+  const [o, r] = await Promise.all([files.outline(path), files.read(path, { lines: Number(lines), now })]);
   if (r.error && !r.type) return { verdict: r.error, ...r };
   if (r.error) return { verdict: /not a text file/.test(r.error) ? `${i.path} is ${i.type}, ${i.size}, modified ${i.age}; it holds no text this kit can read${/old Microsoft/.test(i.type) ? " (old binary Office format)" : ""}` : `${i.path} is ${i.type} (${i.size}); ${r.error}`, path: i.path, type: i.type, size: i.size, modified: i.modified, age: i.age, ...(r.need ? { need: r.need } : {}) };
   return {
